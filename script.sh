@@ -29,6 +29,7 @@ cmake ..
 make
 echo "Now in $(pwd)"
 
+ifconfig
 sleep 1
 echo "Running"
 ./our-chat
