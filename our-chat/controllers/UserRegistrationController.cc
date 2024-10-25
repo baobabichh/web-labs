@@ -2,8 +2,10 @@
 
 // Add definition of your processing function here
 
-void UserRegistrationController::registerUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, std::string email, std::string password)
+void UserRegistrationController::registerUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
 {
+    std::cout << "hello\n";
+
     auto resp=HttpResponse::newHttpResponse();
     resp->setStatusCode(k200OK);
     resp->setContentTypeCode(CT_TEXT_HTML);
