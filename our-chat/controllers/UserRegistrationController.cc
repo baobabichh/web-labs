@@ -111,7 +111,7 @@ void UserRegistrationController::loginUser(const HttpRequestPtr &req, std::funct
 
     try 
     {
-        orm::Result result = dbClient->execSqlSync("SELECT * FROM Users where Email = ? and Password", email, password, 1);
+        orm::Result result = dbClient->execSqlSync("SELECT * FROM Users where Email = ? and Password = ?", email, password, 1);
 
         for (auto row : result)
         {
