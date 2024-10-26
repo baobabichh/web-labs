@@ -5,3 +5,5 @@ sudo systemctl restart mysql.service
 
 sudo mysql -u root < create_db.sql
 
+sudo mysql -u root < create_db.sql
+
