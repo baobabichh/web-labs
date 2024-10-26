@@ -15,4 +15,4 @@ Success result example
 {"Status":"Success"}
 
 Fail result example
-{"Message":"reason":"Fail"}
+{"Message":"There is no user with such email or password","Status":"Fail"}
