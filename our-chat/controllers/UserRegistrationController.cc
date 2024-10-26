@@ -136,7 +136,7 @@ void UserRegistrationController::loginUser(const HttpRequestPtr &req, std::funct
 
     {
         Json::Value jsonResponse;
-        jsonResponse["Message"] = e.base().what();
+        jsonResponse["Message"] = "There is no user with such email or password";
         jsonResponse["Status"] = "Fail";
         auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
         response->setStatusCode(k200OK);

@@ -9,7 +9,7 @@ class UserRegistrationController : public drogon::HttpController<UserRegistratio
   public:
     METHOD_LIST_BEGIN
       ADD_METHOD_TO(UserRegistrationController::registerUser, "/register_user", Post);
-      ADD_METHOD_TO(UserRegistrationController::registerUser, "/login_user", Post);
+      ADD_METHOD_TO(UserRegistrationController::loginUser, "/login_user", Post);
     METHOD_LIST_END
 
     void registerUser(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback);
