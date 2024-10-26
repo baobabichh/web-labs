@@ -7,3 +7,4 @@ CREATE TABLE Users
 );
 
 CREATE INDEX Users_idx_email ON Users (Email);
+CREATE INDEX Users_idx_email_password ON Users (Email, Password);
