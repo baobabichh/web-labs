@@ -6,6 +6,9 @@ void UserRegistrationController::registerUser(const HttpRequestPtr &req, std::fu
 {
     std::cout << "hello\n";
 
+    std::string email = req->getParameter("email");
+    std::string password = req->getParameter("password");
+
     auto resp=HttpResponse::newHttpResponse();
     resp->setStatusCode(k200OK);
     resp->setContentTypeCode(CT_TEXT_HTML);
