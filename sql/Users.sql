@@ -5,3 +5,5 @@ CREATE TABLE Users
     Email VARCHAR(100) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL
 );
+
+CREATE INDEX Users_idx_email ON Users (Email);
