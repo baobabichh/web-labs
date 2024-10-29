@@ -111,10 +111,11 @@ void UserRegistrationController::loginUser(const HttpRequestPtr &req, std::funct
 
     try 
     {
-        orm::Result result = dbClient->execSqlSync("SELECT * FROM Users where Email = ? and Password = ?", email, password, 1);
+        orm::Result result = dbClient->execSqlSync("SELECT ID FROM Users where Email = ? and Password = ?", email, password, 1);
 
         for (auto row : result)
         {
+            req->getSession()->insert("user_id", row["ID"].as<size_t>());
             Json::Value jsonResponse;
             jsonResponse["Status"] = "Success";
             auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
@@ -143,4 +144,15 @@ void UserRegistrationController::loginUser(const HttpRequestPtr &req, std::funct
         callback(response);
         return;
     }
+}
+
+void UserRegistrationController::logoutUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto session = req->getSession();
+    session->erase("user_id");
+    Json::Value jsonResponse;
+    jsonResponse["Status"] = "Success";
+    auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+    response->setStatusCode(k200OK);
+    callback(response);
 }

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        .info {
+            margin-bottom: 10px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .password-container {
+            position: relative;
+        }
+        .password-container input {
+            padding-right: 30px;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        button.delete {
+            background-color: #dc3545;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        button.delete:hover {
+            background-color: #c82333;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>User Profile</h2>
+        <div class="info">
+            <strong>ID:</strong> <span id="userId"></span>
+        </div>
+        <input type="text" id="nameInput" placeholder="Enter new name">
+        <div class="password-container">
+            <input type="password" id="passwordInput" placeholder="Enter new password">
+            <span class="password-toggle" onclick="togglePasswordVisibility()">👁️</span>
+        </div>
+        <button onclick="updateUserInfo()">Save Changes</button>
+        <button class="delete" onclick="deleteUser()">Delete Account</button>
+        <div id="updateMessage" class="info"></div>
+    </div>
+
+    <script>
+        // Toggle Password Visibility
+        function togglePasswordVisibility() {
+            const passwordField = document.getElementById('passwordInput');
+            passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+        }
+
+        // Fetch user information
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/get_user_info');
+                const result = await response.json();
+
+                if (result.Status === "Success") {
+                    document.getElementById('userId').textContent = result.ID;
+                    document.getElementById('nameInput').value = result.Name;
+                    document.getElementById('passwordInput').value = result.Password;
+                } else {
+                    document.getElementById('updateMessage').textContent = result.Message || "Failed to retrieve user information.";
+                    document.getElementById('updateMessage').style.color = "red";
+                }
+            } catch (error) {
+                console.error('Error fetching user information:', error);
+                document.getElementById('updateMessage').textContent = "An error occurred while fetching profile information.";
+                document.getElementById('updateMessage').style.color = "red";
+            }
+        }
+
+        // Update user information
+        async function updateUserInfo() {
+            const newName = document.getElementById('nameInput').value.trim();
+            const newPassword = document.getElementById('passwordInput').value.trim();
+            const updateMessage = document.getElementById('updateMessage');
+
+            if (!newName || !newPassword) {
+                updateMessage.textContent = "Please fill in both fields.";
+                updateMessage.style.color = "red";
+                return;
+            }
+
+            try {
+                const response = await fetch('/update_user_info', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ Name: newName, Password: newPassword }),
+                });
+
+                const result = await response.json();
+                if (result.Status === "Success") {
+                    updateMessage.textContent = "Information updated successfully!";
+                    updateMessage.style.color = "green";
+                } else {
+                    updateMessage.textContent = result.Message || "Failed to update information.";
+                    updateMessage.style.color = "red";
+                }
+            } catch (error) {
+                console.error('Error updating user information:', error);
+                updateMessage.textContent = "An error occurred while updating the information.";
+                updateMessage.style.color = "red";
+            }
+        }
+
+        // Delete user account
+        async function deleteUser() {
+            if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) return;
+
+            try {
+                const response = await fetch('/delete_user', {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                if (result.Status === "Success") {
+                    alert("Account deleted successfully.");
+                    window.location.href = "/";  // Redirect to home page or login page
+                } else {
+                    document.getElementById('updateMessage').textContent = result.Message || "Failed to delete account.";
+                    document.getElementById('updateMessage').style.color = "red";
+                }
+            } catch (error) {
+                console.error('Error deleting user account:', error);
+                document.getElementById('updateMessage').textContent = "An error occurred while deleting the account.";
+                document.getElementById('updateMessage').style.color = "red";
+            }
+        }
+
+        // Fetch user info on page load
+        window.onload = fetchUserInfo;
+    </script>
+</body>
+</html>

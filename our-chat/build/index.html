@@ -97,7 +97,7 @@
             formData.append('password', password);
 
             try {
-                const response = await fetch('http://104.248.137.89:50505/register_user', {
+                const response = await fetch('/register_user', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -129,7 +129,7 @@
             formData.append('password', password);
 
             try {
-                const response = await fetch('http://104.248.137.89:50505/login_user', {
+                const response = await fetch('/login_user', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -138,11 +138,14 @@
                 });
 
                 const result = await response.json();
-                const messageDiv = document.getElementById('loginMessage');
-                messageDiv.textContent = result.Status === "Success" 
-                    ? "Login successful!" 
-                    : result.Message || "Login failed.";
-                messageDiv.style.color = result.Status === "Success" ? "green" : "red";
+                if (result.Status === "Success") {
+                    // Redirect to profile.html on successful login
+                    window.location.href = 'profile.html';
+                } else {
+                    const messageDiv = document.getElementById('loginMessage');
+                    messageDiv.textContent = result.Message || "Login failed.";
+                    messageDiv.style.color = "red";
+                }
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('loginMessage').textContent = "An error occurred during login.";
