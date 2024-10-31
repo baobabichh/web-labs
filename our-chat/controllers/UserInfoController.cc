@@ -400,7 +400,7 @@ void UserInfoController::getMessages(const HttpRequestPtr &req, std::function<vo
 
     try 
     {
-        orm::Result result = dbClient->execSqlSync("SELECT UserID1, UserID2, Content, CreateTS FROM Messages WHERE UserID1 in (?, ?) and UserID2 in (?, ?) order by CreateTS", std::to_string(my_user_id), user_id, std::to_string(my_user_id), user_id, 1);
+        orm::Result result = dbClient->execSqlSync("SELECT UserID1, UserID2, Content, CreateTS FROM Messages WHERE UserID1 in (?, ?) and UserID2 in (?, ?) order by CreateTS limit 10000", std::to_string(my_user_id), user_id, std::to_string(my_user_id), user_id, 1);
 
         Json::Value jsonResponse;
         Json::Value messages_array(Json::arrayValue);
