@@ -100,8 +100,15 @@
         socket.onmessage = function(event) {
             const jsonResponse = JSON.parse(event.data);
             const messagesDiv = document.getElementById('messages');
+            
+            console.log(jsonResponse);
 
-            if(!jsonResponse.NewMessaage)
+            if(jsonResponse.Type != "NewMessaage")
+            {
+                return;
+            }
+
+            if(userIdTo != jsonResponse.FromUserID)
             {
                 return;
             }
