@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User List</title>
+    <script>
+        async function findUsers() {
+            const name = document.getElementById("searchInput").value;
+            const response = await fetch(`/find_users?name=${encodeURIComponent(name)}`);
+            const data = await response.json();
+
+            const userList = document.getElementById("userList");
+            userList.innerHTML = ""; // Clear previous results
+
+            if (data.Status === "Success") {
+                data.Users.forEach(user => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${user.Name} (ID: ${user.ID})`;
+                    
+                    const chatButton = document.createElement("button");
+                    chatButton.textContent = "Start Chat";
+                    chatButton.onclick = () => addChat(user.ID);
+
+                    listItem.appendChild(chatButton);
+                    userList.appendChild(listItem);
+                });
+            } else {
+                alert("Failed to fetch users");
+            }
+        }
+
+        async function addChat(userId) {
+            const response = await fetch(`/add_chat?user_id=${userId}`);
+            const data = await response.json();
+
+            if (data.Status === "Success") {
+                alert("Chat created!");
+                window.location.href = "chat_list.html";
+            } else {
+                alert("Failed to create chat: " + data.Message);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>User List</h1>
+    <div class="navbar">
+        <a href="user_list.html">User List</a> |
+        <a href="chat_list.html">Chat List</a>
+        <a href="profile.html">Profile</a>
+        <a href="index.html">Login</a>
+    </div>
+
+    <input type="text" id="searchInput" placeholder="Search users by name">
+    <button onclick="findUsers()">Search</button>
+
+    <ul id="userList"></ul>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat List</title>
+    <script>
+        async function loadChats() {
+            const response = await fetch("/get_chats");
+            const data = await response.json();
+
+            const chatList = document.getElementById("chatList");
+            chatList.innerHTML = ""; // Clear previous results
+
+            if (data.Status === "Success") {
+                data.Chats.forEach(chat => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `Chat with User ID: ${chat.UserID2}`;
+
+                    const viewButton = document.createElement("button");
+                    viewButton.textContent = "View Chat";
+                    viewButton.onclick = () => viewChat(chat.UserID2);
+
+                    listItem.appendChild(viewButton);
+                    chatList.appendChild(listItem);
+                });
+            } else {
+                alert("Failed to load chats");
+            }
+        }
+
+        function viewChat(userId) {
+            window.location.href = `chat_with_user.html?user_id=${userId}`;
+        }
+
+        window.onload = loadChats;
+    </script>
+</head>
+<body>
+    <h1>Chat List</h1>
+    <div class="navbar">
+        <a href="user_list.html">User List</a> |
+        <a href="chat_list.html">Chat List</a>
+        <a href="profile.html">Profile</a>
+        <a href="index.html">Login</a>
+    </div>
+
+    <ul id="chatList"></ul>
+</body>
+</html>
