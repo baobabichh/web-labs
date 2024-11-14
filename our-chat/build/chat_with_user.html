@@ -239,6 +239,7 @@
         socket.onopen = function() {
             console.log("Connected to the WebSocket server");
             fetchUserInfo(); // Fetch user info when the connection is open
+            fetchOtherUserInfo(); // Fetch user info when the connection is open
             fetchMessages(); // Fetch messages when the connection is open
         };
 
