@@ -275,7 +275,7 @@
             const messagesDiv = document.getElementById('messages');
             if(userId == messageToSend.FromUserID)
             {
-                messagesDiv.innerHTML += `<div><strong>You:</strong> ${message.Content}</div>`;
+                messagesDiv.innerHTML += `<div><strong>You:</strong> ${messageToSend.Content}</div>`;
             }
             else
             {
