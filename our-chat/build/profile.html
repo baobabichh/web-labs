@@ -5,43 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
     <style>
+        /* Body */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #2c3e50;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            color: #ecf0f1;
         }
-        .container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+    
+        /* Navbar */
+        .navbar {
+            width: 100%;
+            background-color: #333;
+            padding: 15px 0;
             text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
+        .navbar a {
+            color: #f4f4f4;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .navbar a:hover {
+            color: #ddd;
+        }
+    
+        /* Container */
+        .container {
+            background: #34495e;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px; 
+            text-align: center;
+            box-sizing: border-box;
+            margin-top: 100px; /* to leave space for the navbar */
+        }
+    
+        /* Headings */
         h2 {
+            color: #ecf0f1;
+            font-weight: 600;
             margin-bottom: 20px;
         }
-        .info {
-            margin-bottom: 10px;
-        }
+    
+        /* Input Fields */
         input[type="text"],
         input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            width: 100%; 
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 6px;
+            border: none;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-size: 16px;
+            box-sizing: border-box;
             text-align: center;
         }
+    
+        /* Password Toggle */
         .password-container {
             position: relative;
-        }
-        .password-container input {
-            padding-right: 30px;
         }
         .password-toggle {
             position: absolute;
@@ -49,39 +83,48 @@
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
+            color: #7f8c8d;
         }
+    
+        /* Buttons */
         button {
-            background-color: #28a745;
+            width: 100%; 
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            background-color: #3498db;
             color: white;
             border: none;
-            padding: 10px;
+            font-size: 16px;
             cursor: pointer;
-            width: 100%;
-            border-radius: 4px;
-            margin-top: 10px;
         }
         button.delete {
-            background-color: #dc3545;
+            background-color: #e74c3c;
+            margin-bottom: 15px;
         }
         button:hover {
-            background-color: #218838;
+            background-color: #2980b9;
         }
         button.delete:hover {
-            background-color: #c82333;
+            background-color: #c0392b;
         }
-        .error {
-            color: red;
+    
+        /* Messages */
+        .message {
+            margin-top: 15px;
+            color: #bdc3c7;
         }
-    </style>
+    </style>    
 </head>
 <body>
+    <div class="navbar">
+        <a href="user_list.html">User List</a> |
+        <a href="chat_list.html">Chat List</a> |
+        <a href="profile.html">Profile</a> |
+        <a href="index.html">Login</a>
+    </div>
+
     <div class="container">
-        <div class="navbar">
-            <a href="user_list.html">User List</a> |
-            <a href="chat_list.html">Chat List</a>
-            <a href="profile.html">Profile</a>
-            <a href="index.html">Login</a>
-        </div>
         <h2>User Profile</h2>
         <div class="info">
             <strong>ID:</strong> <span id="userId"></span>
@@ -115,12 +158,10 @@
                     document.getElementById('passwordInput').value = result.Password;
                 } else {
                     document.getElementById('updateMessage').textContent = result.Message || "Failed to retrieve user information.";
-                    document.getElementById('updateMessage').style.color = "red";
                 }
             } catch (error) {
                 console.error('Error fetching user information:', error);
                 document.getElementById('updateMessage').textContent = "An error occurred while fetching profile information.";
-                document.getElementById('updateMessage').style.color = "red";
             }
         }
 
@@ -132,7 +173,6 @@
 
             if (!newName || !newPassword) {
                 updateMessage.textContent = "Please fill in both fields.";
-                updateMessage.style.color = "red";
                 return;
             }
 
@@ -148,15 +188,12 @@
                 const result = await response.json();
                 if (result.Status === "Success") {
                     updateMessage.textContent = "Information updated successfully!";
-                    updateMessage.style.color = "green";
                 } else {
                     updateMessage.textContent = result.Message || "Failed to update information.";
-                    updateMessage.style.color = "red";
                 }
             } catch (error) {
                 console.error('Error updating user information:', error);
                 updateMessage.textContent = "An error occurred while updating the information.";
-                updateMessage.style.color = "red";
             }
         }
 
@@ -175,12 +212,10 @@
                     window.location.href = "/";  // Redirect to home page or login page
                 } else {
                     document.getElementById('updateMessage').textContent = result.Message || "Failed to delete account.";
-                    document.getElementById('updateMessage').style.color = "red";
                 }
             } catch (error) {
                 console.error('Error deleting user account:', error);
                 document.getElementById('updateMessage').textContent = "An error occurred while deleting the account.";
-                document.getElementById('updateMessage').style.color = "red";
             }
         }
 
