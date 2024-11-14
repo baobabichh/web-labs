@@ -199,7 +199,7 @@
                                 }
                                 else
                                 {
-                                    messagesDiv.innerHTML += `<div><strong>User ${userToName}:</strong> ${message.Content}</div>`;
+                                    messagesDiv.innerHTML += `<div><strong>${userToName}:</strong> ${message.Content}</div>`;
                                 }
                             });
                             messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
@@ -231,7 +231,7 @@
                 return;
             }
 
-            messagesDiv.innerHTML += `<div><strong>User ${jsonResponse.FromUserID}:</strong> ${jsonResponse.Content}</div>`;
+            messagesDiv.innerHTML += `<div><strong>${userToName}:</strong> ${jsonResponse.Content}</div>`;
             messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
         };
 
@@ -279,7 +279,7 @@
             }
             else
             {
-                messagesDiv.innerHTML += `<div><strong>User ${messageToSend.FromUserID}:</strong> ${messageToSend.content}</div>`;
+                messagesDiv.innerHTML += `<div><strong>${userToName}:</strong> ${messageToSend.content}</div>`;
             }
             messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
         }
