@@ -273,14 +273,8 @@
             messageInput.value = ""; // Clear the input field
             
             const messagesDiv = document.getElementById('messages');
-            if(userId == messageToSend.FromUserID)
-            {
-                messagesDiv.innerHTML += `<div><strong>You:</strong> ${messageToSend.Content}</div>`;
-            }
-            else
-            {
-                messagesDiv.innerHTML += `<div><strong>${userToName}:</strong> ${messageToSend.content}</div>`;
-            }
+
+            messagesDiv.innerHTML += `<div><strong>You:</strong> ${messageToSend.content}</div>`;
             messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
         }
 
