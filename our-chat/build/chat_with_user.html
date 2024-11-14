@@ -35,6 +35,7 @@
 
     <script>
         let userId; // Declare a variable to hold the user ID
+        let userName;
 
         // Function to get user info from the server
         function fetchUserInfo() {
@@ -46,6 +47,7 @@
                         const jsonResponse = JSON.parse(xhr.responseText);
                         if (jsonResponse.Status === "Success") {
                             userId = jsonResponse.ID; // Store the user ID
+                            userName = jsonResponse.Name;
                             console.log("User ID retrieved:", userId);
                         } else {
                             console.error("Error fetching user info:", jsonResponse.Message);
@@ -63,6 +65,28 @@
             return urlParams.get(param);
         }
         const userIdTo = getQueryParam("user_id");
+        let userToName;
+
+        function fetchOtherUserInfo() {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", `/get_other_user_info?user_id=${userIdTo}`, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        const jsonResponse = JSON.parse(xhr.responseText);
+                        if (jsonResponse.Status === "Success") {
+                            userToName = jsonResponse.Name;
+                            console.log("User ID retrieved:", userId);
+                        } else {
+                            console.error("Error fetching user info:", jsonResponse.Message);
+                        }
+                    } else {
+                        console.error("Error fetching user info:", xhr.statusText);
+                    }
+                }
+            };
+            xhr.send();
+        }
 
         // Automatically get the WebSocket URL based on the current domain
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -82,7 +106,14 @@
                             const messagesDiv = document.getElementById('messages');
                             messagesDiv.innerHTML = ''; // Clear previous messages
                             jsonResponse.Messages.forEach(message => {
-                                messagesDiv.innerHTML += `<div><strong>User ${message.UserID1}:</strong> ${message.Content}</div>`;
+                                if(userId == message.UserID1)
+                                {
+                                    messagesDiv.innerHTML += `<div><strong>You:</strong> ${message.Content}</div>`;
+                                }
+                                else
+                                {
+                                    messagesDiv.innerHTML += `<div><strong>User ${userToName}:</strong> ${message.Content}</div>`;
+                                }
                             });
                             messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
                         } else {

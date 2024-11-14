@@ -14,7 +14,7 @@
             if (data.Status === "Success") {
                 data.Chats.forEach(chat => {
                     const listItem = document.createElement("li");
-                    listItem.textContent = `Chat with User ID: ${chat.UserID2}`;
+                    listItem.textContent = `Chat with User ID: ${chat.UserID2} Name: ${chat.Name}`;
 
                     const viewButton = document.createElement("button");
                     viewButton.textContent = "View Chat";
