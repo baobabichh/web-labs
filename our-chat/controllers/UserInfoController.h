@@ -16,6 +16,7 @@ class UserInfoController : public drogon::HttpController<UserInfoController>
       ADD_METHOD_TO(UserInfoController::addChat, "/add_chat", Get, "LoginFilter");
       ADD_METHOD_TO(UserInfoController::getChats, "/get_chats", Get, "LoginFilter");
       ADD_METHOD_TO(UserInfoController::deleteChat, "/delete_chat", Get, "LoginFilter");
+      ADD_METHOD_TO(UserInfoController::getOtherUserInfo, "/get_other_user_info", Get, "LoginFilter");
 
       ADD_METHOD_TO(UserInfoController::getMessages, "/get_messages", Get, "LoginFilter");
     METHOD_LIST_END
@@ -25,6 +26,7 @@ class UserInfoController : public drogon::HttpController<UserInfoController>
     void deleteUser(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback);
     void findUsers(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback);
 
+    void getOtherUserInfo(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback);
     void addChat(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback);
     void getChats(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback);
     void deleteChat(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback);

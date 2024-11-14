@@ -196,6 +196,59 @@ void UserInfoController::findUsers(const HttpRequestPtr &req, std::function<void
     return;
 }
 
+void UserInfoController::getOtherUserInfo(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto session = req->getSession();
+    auto dbClient = app().getDbClient("our_chat");
+
+    std::string user_id = req->getParameter("user_id");
+    if(user_id.empty())
+    {
+        Json::Value jsonResponse;
+        jsonResponse["Message"] = "Parameter user_id is empty";
+        jsonResponse["Status"] = "Fail";
+        auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+        response->setStatusCode(k200OK);
+        callback(response);
+        return;
+    }
+
+    try 
+    {
+        orm::Result result = dbClient->execSqlSync("SELECT ID, Name FROM Users where ID = ?", user_id, 1);
+
+        for (auto row : result)
+        {
+            Json::Value jsonResponse;
+            jsonResponse["ID"] = row["ID"].as<size_t>();
+            jsonResponse["Name"] = row["Name"].as<std::string>();
+            jsonResponse["Status"] = "Success";
+            auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+            response->setStatusCode(k200OK);
+            callback(response);
+            return;
+        }
+    }
+    catch (const orm::DrogonDbException &e)
+    {
+        Json::Value jsonResponse;
+        jsonResponse["Message"] = e.base().what();
+        jsonResponse["Status"] = "Fail";
+        auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+        response->setStatusCode(k200OK);
+        callback(response);
+        return;
+    }
+
+    Json::Value jsonResponse;
+    jsonResponse["Message"] = "No such user";
+    jsonResponse["Status"] = "Fail";
+    auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+    response->setStatusCode(k200OK);
+    callback(response);
+    return;
+}
+
 void UserInfoController::addChat(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
 {
     auto dbClient = app().getDbClient("our_chat");
@@ -292,7 +345,7 @@ void UserInfoController::getChats(const HttpRequestPtr &req, std::function<void(
 
     try 
     {
-        orm::Result result = dbClient->execSqlSync("SELECT UserID2 FROM UserChats WHERE UserID1 = ? ", std::to_string(my_user_id), 1);
+        orm::Result result = dbClient->execSqlSync("SELECT c.UserID2, u.Name FROM UserChats c inner join Users u on u.id = c.UserID2 WHERE c.UserID1 = ? ", std::to_string(my_user_id), 1);
 
         Json::Value jsonResponse;
         Json::Value chats_array(Json::arrayValue);
@@ -301,6 +354,7 @@ void UserInfoController::getChats(const HttpRequestPtr &req, std::function<void(
         {
             Json::Value chat;
             chat["UserID2"] = row["UserID2"].as<size_t>();
+            chat["Name"] = row["Name"].as<std::string>();
             chats_array.append(chat);
         }
 
