@@ -127,7 +127,7 @@
         // Function to get user info from the server
         function fetchUserInfo() {
             const xhr = new XMLHttpRequest();
-            xhr.open("GET", "/get_user_info", true); // Call your user info endpoint
+            xhr.open("GET", "/get_user_info", false); // Call your user info endpoint
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
@@ -156,7 +156,7 @@
 
         function fetchOtherUserInfo() {
             const xhr = new XMLHttpRequest();
-            xhr.open("GET", `/get_other_user_info?user_id=${userIdTo}`, true);
+            xhr.open("GET", `/get_other_user_info?user_id=${userIdTo}`, false);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
