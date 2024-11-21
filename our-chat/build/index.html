@@ -30,6 +30,7 @@
             font-weight: 600;
             margin-bottom: 20px;
         }
+        input[type="text"],
         input[type="email"],
         input[type="password"],
         button {
@@ -40,6 +41,7 @@
             font-size: 16px;
             box-sizing: border-box;
         }
+        input[type="text"],
         input[type="email"],
         input[type="password"] {
             border: none;
@@ -65,6 +67,18 @@
             cursor: pointer;
             font-size: 14px;
         }
+        /* Password Toggle */
+        .password-container {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #7f8c8d;
+        }
     </style>
 </head>
 <body>
@@ -72,7 +86,10 @@
         <h2>Online Chat</h2>
         <form id="registrationForm">
             <input type="email" id="regEmail" placeholder="Email" required>
-            <input type="password" id="regPassword" placeholder="Password" required>
+            <div class="password-container">
+                <input type="password" id="regPassword" placeholder="Password" required>
+                <span class="password-toggle" onclick="togglePasswordVisibility()">👁️</span>
+            </div>
             <button type="submit">Join Chat</button>
         </form>
         <div class="message" id="regMessage"></div>
@@ -93,6 +110,12 @@
     </div>
 
     <script>
+        // Toggle Password Visibility
+        function togglePasswordVisibility() {
+            const passwordField = document.getElementById('regPassword');
+            passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+        }
+
         // Registration Form
         document.getElementById('registrationForm').addEventListener('submit', async function (event) {
             event.preventDefault();
