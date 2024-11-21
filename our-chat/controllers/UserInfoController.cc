@@ -286,7 +286,7 @@ void UserInfoController::addChat(const HttpRequestPtr &req, std::function<void(c
         for (auto row : result)
         {
             Json::Value jsonResponse;
-            jsonResponse["Message"] = "There is olready chat";
+            jsonResponse["Message"] = "There is already chat";
             jsonResponse["Status"] = "Fail";
             auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
             response->setStatusCode(k200OK);
