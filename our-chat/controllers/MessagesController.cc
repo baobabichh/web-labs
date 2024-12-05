@@ -11,19 +11,14 @@ void MessagesController::handleNewMessage(const WebSocketConnectionPtr& wsConnPt
 {
     std::string my_user_id = std::to_string(_con_to_user_id[wsConnPtr]);
 
-
-    std::cout << "my_user_id : " << my_user_id << "\n";
-
     if (type == drogon::WebSocketMessageType::Text)
     {
-        std::cout << "if (type == drogon::WebSocketMessageType::Text)\n";
         Json::Value jsonData;
         Json::CharReaderBuilder readerBuilder;
         std::string errs;
 
         std::istringstream iss(message);
 
-        std::cout << "message: " << message << "\n";
         if (Json::parseFromStream(readerBuilder, iss, &jsonData, &errs))
         {
             auto dbClient = app().getDbClient("our_chat");
@@ -31,16 +26,12 @@ void MessagesController::handleNewMessage(const WebSocketConnectionPtr& wsConnPt
             std::string to_user_id = jsonData["user_id"].asString();
             std::string content = jsonData["content"].asString();
 
-            std::cout << "to_user_id: " << to_user_id << "\n";
-            std::cout << "content: " << content << "\n";
-
             if(content.empty())
             {
                 Json::Value jsonResponse;
                 jsonResponse["Message"] = "Field content is empty";
                 jsonResponse["Status"] = "Fail";
                 wsConnPtr->send(jsonValueToString(jsonResponse));
-                std::cout << __LINE__ << "\n";
                 return;
             }
 
@@ -50,7 +41,6 @@ void MessagesController::handleNewMessage(const WebSocketConnectionPtr& wsConnPt
                 jsonResponse["Message"] = "Field to_user_id is empty";
                 jsonResponse["Status"] = "Fail";
                 wsConnPtr->send(jsonValueToString(jsonResponse));
-                std::cout << __LINE__ << "\n";
                 return;
             }
 
@@ -64,7 +54,6 @@ void MessagesController::handleNewMessage(const WebSocketConnectionPtr& wsConnPt
                     jsonResponse["Message"] = "There is no such user";
                     jsonResponse["Status"] = "Fail";
                     wsConnPtr->send(jsonValueToString(jsonResponse));
-                    std::cout << __LINE__ << "\n";
                     return;
                 }
             }
@@ -74,7 +63,6 @@ void MessagesController::handleNewMessage(const WebSocketConnectionPtr& wsConnPt
                 jsonResponse["Message"] = e.base().what();
                 jsonResponse["Status"] = "Fail";
                 wsConnPtr->send(jsonValueToString(jsonResponse));
-                std::cout << __LINE__ << "\n";
                 return;
             }
 
@@ -88,7 +76,6 @@ void MessagesController::handleNewMessage(const WebSocketConnectionPtr& wsConnPt
                 jsonResponse["Message"] = e.base().what();
                 jsonResponse["Status"] = "Fail";
                 wsConnPtr->send(jsonValueToString(jsonResponse));
-                std::cout << __LINE__ << "\n";
                 return;
             }
 
@@ -101,14 +88,12 @@ void MessagesController::handleNewMessage(const WebSocketConnectionPtr& wsConnPt
                 jsonResponse["FromUserID"] = size_t(std::stoull(my_user_id));
                 jsonResponse["Type"] = "NewMessaage";
                 _user_id_to_con[to_user_id_int]->send(jsonValueToString(jsonResponse));
-                std::cout << __LINE__ << "\n";
             }
 
             {
                 Json::Value jsonResponse;
                 jsonResponse["Status"] = "Success";
                 wsConnPtr->send(jsonValueToString(jsonResponse));
-                std::cout << __LINE__ << "\n";
                 return;
             }
         }
@@ -118,7 +103,6 @@ void MessagesController::handleNewMessage(const WebSocketConnectionPtr& wsConnPt
             jsonResponse["Message"] = errs;
             jsonResponse["Status"] = "Fail";
             wsConnPtr->send(jsonValueToString(jsonResponse));
-            std::cout << __LINE__ << "\n";
             return;
         }
     }
