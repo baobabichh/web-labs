@@ -135,8 +135,8 @@
                 const jsonResponse = await response.json();
 
                 if (jsonResponse.Status === "Success") {
-                    const userId = jsonResponse.ID; // Store the user ID
-                    const userName = jsonResponse.Name;
+                    userId = jsonResponse.ID; // Store the user ID
+                    userName = jsonResponse.Name;
                     console.log("User ID retrieved:", userId);
                 } else {
                     console.error("Error fetching user info:", jsonResponse.Message);
@@ -163,7 +163,7 @@
                 const jsonResponse = await response.json();
 
                 if (jsonResponse.Status === "Success") {
-                    const userToName = jsonResponse.Name;
+                    userToName = jsonResponse.Name;
                     console.log("User Name retrieved:", userToName);
                 } else {
                     console.error("Error fetching other user info:", jsonResponse.Message);
@@ -172,8 +172,6 @@
                 console.error("Error fetching other user info:", error.message);
             }
         }
-        fetchUserInfo(); // Fetch user info when the connection is open
-        fetchOtherUserInfo(); // Fetch user info when the connection is open
 
         // Automatically get the WebSocket URL based on the current domain
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
