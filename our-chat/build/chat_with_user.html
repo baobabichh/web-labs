@@ -125,26 +125,25 @@
         let userName;
 
         // Function to get user info from the server
-        function fetchUserInfo() {
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", "/get_user_info", false); // Call your user info endpoint
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        const jsonResponse = JSON.parse(xhr.responseText);
-                        if (jsonResponse.Status === "Success") {
-                            userId = jsonResponse.ID; // Store the user ID
-                            userName = jsonResponse.Name;
-                            console.log("User ID retrieved:", userId);
-                        } else {
-                            console.error("Error fetching user info:", jsonResponse.Message);
-                        }
-                    } else {
-                        console.error("Error fetching user info:", xhr.statusText);
-                    }
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch("/get_user_info"); // Call your user info endpoint
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-            };
-            xhr.send();
+
+                const jsonResponse = await response.json();
+
+                if (jsonResponse.Status === "Success") {
+                    userId = jsonResponse.ID; // Store the user ID
+                    userName = jsonResponse.Name;
+                    console.log("User ID retrieved:", userId);
+                } else {
+                    console.error("Error fetching user info:", jsonResponse.Message);
+                }
+            } catch (error) {
+                console.error("Error fetching user info:", error.message);
+            }
         }
 
         function getQueryParam(param) {
@@ -154,28 +153,25 @@
         const userIdTo = getQueryParam("user_id");
         let userToName;
 
-        function fetchOtherUserInfo() {
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", `/get_other_user_info?user_id=${userIdTo}`, false);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        const jsonResponse = JSON.parse(xhr.responseText);
-                        if (jsonResponse.Status === "Success") {
-                            userToName = jsonResponse.Name;
-                            console.log("User ID retrieved:", userId);
-                        } else {
-                            console.error("Error fetching user info:", jsonResponse.Message);
-                        }
-                    } else {
-                        console.error("Error fetching user info:", xhr.statusText);
-                    }
+        async function fetchOtherUserInfo() {
+            try {
+                const response = await fetch(`/get_other_user_info?user_id=${encodeURIComponent(userIdTo)}`); // Encode userIdTo for safety
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-            };
-            xhr.send();
+
+                const jsonResponse = await response.json();
+
+                if (jsonResponse.Status === "Success") {
+                    userToName = jsonResponse.Name;
+                    console.log("User Name retrieved:", userToName);
+                } else {
+                    console.error("Error fetching other user info:", jsonResponse.Message);
+                }
+            } catch (error) {
+                console.error("Error fetching other user info:", error.message);
+            }
         }
-        fetchUserInfo(); // Fetch user info when the connection is open
-        fetchOtherUserInfo(); // Fetch user info when the connection is open
 
         // Automatically get the WebSocket URL based on the current domain
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -184,36 +180,34 @@
         const socket = new WebSocket(wsUrl);
 
         // Function to fetch all messages
-        function fetchMessages() {
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", `/get_messages?user_id=${userIdTo}`, true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        const jsonResponse = JSON.parse(xhr.responseText);
-                        if (jsonResponse.Status === "Success") {
-                            const messagesDiv = document.getElementById('messages');
-                            messagesDiv.innerHTML = ''; // Clear previous messages
-                            jsonResponse.Messages.forEach(message => {
-                                if(userId == message.UserID1)
-                                {
-                                    messagesDiv.innerHTML += `<div><strong>You:</strong> ${message.Content}</div>`;
-                                }
-                                else
-                                {
-                                    messagesDiv.innerHTML += `<div><strong>${userToName}:</strong> ${message.Content}</div>`;
-                                }
-                            });
-                            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
-                        } else {
-                            console.error("Error fetching messages:", jsonResponse.Message);
-                        }
-                    } else {
-                        console.error("Error fetching messages:", xhr.statusText);
-                    }
+        async function fetchMessages() {
+            try {
+                const response = await fetch(`/get_messages?user_id=${encodeURIComponent(userIdTo)}`); // Encode userIdTo for safety
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-            };
-            xhr.send();
+
+                const jsonResponse = await response.json();
+
+                if (jsonResponse.Status === "Success") {
+                    const messagesDiv = document.getElementById('messages');
+                    messagesDiv.innerHTML = ''; // Clear previous messages
+
+                    jsonResponse.Messages.forEach(message => {
+                        if (userId === message.UserID1) {
+                            messagesDiv.innerHTML += `<div><strong>You:</strong> ${message.Content}</div>`;
+                        } else {
+                            messagesDiv.innerHTML += `<div><strong>${userToName}:</strong> ${message.Content}</div>`;
+                        }
+                    });
+
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
+                } else {
+                    console.error("Error fetching messages:", jsonResponse.Message);
+                }
+            } catch (error) {
+                console.error("Error fetching messages:", error.message);
+            }
         }
 
         // Handle incoming messages
@@ -238,9 +232,11 @@
         };
 
         // Handle connection opening
-        socket.onopen = function() {
+        socket.onopen = async function() {
             console.log("Connected to the WebSocket server");
-            fetchMessages(); // Fetch messages when the connection is open
+            await fetchUserInfo(); // Fetch user info when the connection is open
+            await fetchOtherUserInfo(); // Fetch user info when the connection is open
+            await fetchMessages(); // Fetch messages when the connection is open
         };
 
         // Handle errors

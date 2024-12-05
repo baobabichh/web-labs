@@ -128,7 +128,7 @@
             formData.append('password', password);
 
             try {
-                const response = await fetch('http://104.248.137.89:50505/register_user', {
+                const response = await fetch('/register_user', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
