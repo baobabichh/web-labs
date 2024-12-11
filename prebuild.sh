@@ -77,15 +77,9 @@ cmake ..
 make
 echo "Now in $(pwd)"
 
-ifconfig
-
 
 cd ..
 cd ..
-
-export MY_INSTALL_DIR=$HOME/.local
-mkdir -p $MY_INSTALL_DIR
-export PATH="$MY_INSTALL_DIR/bin:$PATH"
 
 sudo apt-get update -y
 sudo apt-get upgrade -y
@@ -99,6 +93,3 @@ sudo apt install -y build-essential autoconf libtool pkg-config
 
 sudo apt-get update -y
 sudo apt-get upgrade -y
-
-cd ..
-cd ..

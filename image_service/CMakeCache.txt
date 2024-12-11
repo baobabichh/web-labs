@@ -228,7 +228,7 @@ RouteGuide_IS_TOP_LEVEL:STATIC=ON
 RouteGuide_SOURCE_DIR:STATIC=/home/goshan9/web/web-labs/image_service
 
 //The directory containing a CMake configuration file for absl.
-absl_DIR:PATH=/usr/local/lib/cmake/absl
+absl_DIR:PATH=absl_DIR-NOTFOUND
 
 //TRUE
 protobuf_MODULE_COMPATIBLE:BOOL=OFF
