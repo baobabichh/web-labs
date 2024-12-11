@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 3.8)
 
 project(RouteGuide C CXX)
 
-include("grpc/examples/cpp/cmake/common.cmake")
+set(Protobuf_DIR "/usr/local/lib/cmake/protobuf")
+
+find_package(Protobuf CONFIG REQUIRED)
+
+
+find_package(Protobuf CONFIG REQUIRED)
 
 include_directories(generated_protos)
 
