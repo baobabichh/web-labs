@@ -1,51 +1,87 @@
 #include <grpcpp/grpcpp.h>
-#include "generated_protos/image_service.grpc.pb.h"
+#include "protos/image_service.grpc.pb.h"
 #include <fstream>
+#include <filesystem>
 #include <iostream>
-#include <string>
 
-using grpc::Server;
-using grpc::ServerBuilder;
-using grpc::ServerContext;
-using grpc::Status;
-using image_service::ImageService;
-using image_service::ImageRequest;
-using image_service::ImageResponse;
+namespace fs = std::filesystem;
 
-class ImageServiceImpl final : public ImageService::Service
+const std::string IMAGE_DIRECTORY = "../images/";
+
+class ImageServiceImpl final : public image_service::ImageService::Service
 {
 public:
-    Status GetImage(ServerContext* context, const ImageRequest* request, ImageResponse* response) override {
-        const std::string& user_id = request->user_id();
-        
-        std::ifstream image_file(user_id, std::ios::in | std::ios::binary);
-        if (!image_file)
+    ImageServiceImpl()
+    {
+        if (!fs::exists(IMAGE_DIRECTORY))
         {
-            std::cerr << "Error: Unable to open file " << user_id << std::endl;
-            return Status(grpc::StatusCode::NOT_FOUND, "File not found");
+            fs::create_directories(IMAGE_DIRECTORY);
         }
+    }
 
-        std::string image_data((std::istreambuf_iterator<char>(image_file)), std::istreambuf_iterator<char>());
+    grpc::Status SetImage(grpc::ServerContext* context, const image_service::SetImageRequest* request, image_service::SetImageResponse* response) override
+    {
+        try
+        {
+            std::string file_path = IMAGE_DIRECTORY + request->user_id() + ".png";
+            
+            std::ofstream file(file_path, std::ios::binary);
+            if (!file.is_open())
+            {
+                return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to open file for writing.");
+            }
+            file.write(request->image_data().data(), request->image_data().size());
+            file.close();
 
-        response->set_image_data(image_data);
+            return grpc::Status::OK;
+        }
+        catch (const std::exception& e)
+        {
+            return grpc::Status(grpc::StatusCode::INTERNAL, e.what());
+        }
+    }
 
-        std::cout << "Served image: " << path_id << std::endl;
-        return Status::OK;
+    grpc::Status GetImage(grpc::ServerContext* context, const image_service::ImageRequest* request, image_service::ImageResponse* response) override
+    {
+        try
+        {
+            std::string file_path = IMAGE_DIRECTORY + request->user_id() + ".png";
+
+            if (!fs::exists(file_path))
+            {
+                return grpc::Status(grpc::StatusCode::NOT_FOUND, "Image not found.");
+            }
+
+            std::ifstream file(file_path, std::ios::binary);
+            if (!file.is_open())
+            {
+                return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to open file for reading.");
+            }
+
+            std::vector<char> buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            file.close();
+
+            response->set_image_data(std::string(buffer.begin(), buffer.end()));
+
+            return grpc::Status::OK;
+        }
+        catch (const std::exception& e)
+        {
+            return grpc::Status(grpc::StatusCode::INTERNAL, e.what());
+        }
     }
 };
 
-// Start the server.
 void RunServer()
 {
-    const std::string server_address("0.0.0.0:50051");
-
+    std::string server_address("0.0.0.0:50051");
     ImageServiceImpl service;
 
-    ServerBuilder builder;
+    grpc::ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
     builder.RegisterService(&service);
 
-    std::unique_ptr<Server> server(builder.BuildAndStart());
+    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
     std::cout << "Server listening on " << server_address << std::endl;
 
     server->Wait();

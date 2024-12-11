@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package image_service;
+
+service ImageService {
+  rpc GetImage (ImageRequest) returns (ImageResponse);
+  rpc SetImage (SetImageRequest) returns (SetImageResponse);
+}
+
+message ImageRequest {
+  string user_id = 1;
+}
+
+message ImageResponse {
+  bytes image_data = 1; 
+}
+
+message SetImageRequest {
+  string user_id = 1;
+  bytes image_data = 2;
+}
+
+message SetImageResponse {
+
+}

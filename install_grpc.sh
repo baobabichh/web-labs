@@ -17,7 +17,6 @@ mkdir -p cmake/build
 cd cmake/build
 cmake -DgRPC_INSTALL=ON \
       -DgRPC_BUILD_TESTS=OFF \
-      -DCMAKE_INSTALL_PREFIX=$MY_INSTALL_DIR \
       ../..
 make -j 4
 make install
@@ -28,5 +27,5 @@ cd examples/cpp/helloworld
 
 mkdir -p cmake/build
 cd cmake/build
-cmake -DCMAKE_PREFIX_PATH=$MY_INSTALL_DIR ../..
+cmake ../..
 make -j 4

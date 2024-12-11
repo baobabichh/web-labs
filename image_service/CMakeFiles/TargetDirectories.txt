@@ -1,0 +1,6 @@
+/home/goshan9/web-labs/web-labs/image_service/CMakeFiles/rg_grpc_proto.dir
+/home/goshan9/web-labs/web-labs/image_service/CMakeFiles/my_grpc_lib.dir
+/home/goshan9/web-labs/web-labs/image_service/CMakeFiles/image_client.dir
+/home/goshan9/web-labs/web-labs/image_service/CMakeFiles/image_service.dir
+/home/goshan9/web-labs/web-labs/image_service/CMakeFiles/edit_cache.dir
+/home/goshan9/web-labs/web-labs/image_service/CMakeFiles/rebuild_cache.dir
