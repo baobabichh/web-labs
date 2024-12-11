@@ -4,16 +4,15 @@ export PATH="$MY_INSTALL_DIR/bin:$PATH"
 
 sudo apt-get update -y
 sudo apt-get upgrade -y
+sudo apt-get install -y cmake
 
-sudo apt install -y cmake
+sudo apt-get update -y
+sudo apt-get upgrade -y
+sudo apt-get install -y build-essential autoconf libtool pkg-config
 
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
-sudo apt install -y build-essential autoconf libtool pkg-config
-
-sudo apt-get update -y
-sudo apt-get upgrade -y
 
 git clone --recurse-submodules -b v1.66.0 --depth 1 --shallow-submodules https://github.com/grpc/grpc
 
@@ -24,7 +23,7 @@ cmake -DgRPC_INSTALL=ON \
       -DgRPC_BUILD_TESTS=OFF \
       -DCMAKE_INSTALL_PREFIX=$MY_INSTALL_DIR \
       ../..
-make -j 3
+make -j 4
 make install
 cd ..
 cd ..
