@@ -50,6 +50,29 @@ public:
         }
     }
 
+    bool GetPhotoData(const std::string& user_id, std::vector<char>& buffer)
+    {
+        image_service::SetImageRequest request;
+        request.set_user_id(user_id);
+        request.set_image_data(std::string(buffer.begin(), buffer.end()));
+
+        image_service::SetImageResponse response;
+        grpc::ClientContext context;
+
+        grpc::Status status = _stub->SetImage(&context, request, &response);
+
+        if (status.ok())
+        {
+            std::cout << "Photo sent successfully for user_id: " << user_id << std::endl;
+            return true;
+        }
+        else
+        {
+            std::cerr << "Failed to send photo: " << status.error_message() << std::endl;
+            return false;
+        }
+    }
+
 private:
     std::unique_ptr<image_service::ImageService::Stub> _stub;
 };
@@ -65,4 +88,9 @@ bool SendPhotoDataToServer(const std::string& server_address, const std::string&
 {
     ImageServiceClient client(grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials()));
     return client.SendPhotoData(user_id, photo_data);
+}
+
+bool GetPhotoDataOfUser(const std::string& server_address, const std::string& user_id, std::vector<char>& photo_data)
+{
+
 }
