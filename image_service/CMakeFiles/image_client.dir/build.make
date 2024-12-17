@@ -110,11 +110,11 @@ image_client: /usr/local/lib/libupb_message_lib.a
 image_client: /usr/local/lib/libupb_base_lib.a
 image_client: /usr/local/lib/libupb_mem_lib.a
 image_client: /usr/local/lib/libre2.a
-image_client: /usr/local/lib/libz.a
+image_client: /usr/local/lib/libz.so
 image_client: /usr/local/lib/libcares.a
 image_client: /usr/local/lib/libgpr.a
-image_client: /usr/local/lib/libssl.a
-image_client: /usr/local/lib/libcrypto.a
+image_client: /usr/lib/x86_64-linux-gnu/libssl.so
+image_client: /usr/lib/x86_64-linux-gnu/libcrypto.so
 image_client: /usr/local/lib/libaddress_sorting.a
 image_client: /usr/local/lib/libabsl_log_initialize.a
 image_client: /usr/local/lib/libabsl_log_internal_check_op.a

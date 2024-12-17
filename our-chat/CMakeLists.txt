@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(our-chat CXX)
 
-include(CheckIncludeFileCXX)
-
+find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
+
+include(CheckIncludeFileCXX)
 
 check_include_file_cxx(any HAS_ANY)
 check_include_file_cxx(string_view HAS_STRING_VIEW)
@@ -24,6 +25,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME} main.cc)
 
+find_package(Protobuf REQUIRED)
+find_package(gRPC REQUIRED)
+
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
 # to add drogon 
@@ -37,8 +41,9 @@ find_package(Drogon CONFIG REQUIRED)
 # target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../image_service)
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/../image_service/librg_grpc_proto.a
     ${CMAKE_CURRENT_SOURCE_DIR}/../image_service/libmy_grpc_lib.a
-    Drogon::Drogon 
+    Drogon::Drogon
 )
 
 # ##############################################################################

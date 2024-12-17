@@ -110,11 +110,11 @@ image_service: /usr/local/lib/libupb_message_lib.a
 image_service: /usr/local/lib/libupb_base_lib.a
 image_service: /usr/local/lib/libupb_mem_lib.a
 image_service: /usr/local/lib/libre2.a
-image_service: /usr/local/lib/libz.a
+image_service: /usr/local/lib/libz.so
 image_service: /usr/local/lib/libcares.a
 image_service: /usr/local/lib/libgpr.a
-image_service: /usr/local/lib/libssl.a
-image_service: /usr/local/lib/libcrypto.a
+image_service: /usr/lib/x86_64-linux-gnu/libssl.so
+image_service: /usr/lib/x86_64-linux-gnu/libcrypto.so
 image_service: /usr/local/lib/libaddress_sorting.a
 image_service: /usr/local/lib/libabsl_log_initialize.a
 image_service: /usr/local/lib/libabsl_log_internal_check_op.a
