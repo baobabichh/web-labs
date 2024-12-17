@@ -26,43 +26,39 @@ set(rg_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/../generated_protos/protos/image_s
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 # rg_grpc_proto
-add_library(rg_grpc_proto
+add_library(rg_grpc_proto STATIC
   ${rg_grpc_srcs}
   ${rg_grpc_hdrs}
   ${rg_proto_srcs}
   ${rg_proto_hdrs})
 
-target_link_libraries(rg_grpc_proto
-  absl::absl_log
-  ${_REFLECTION}
-  ${_GRPC_GRPCPP}
-  ${_PROTOBUF_LIBPROTOBUF})
-
 target_link_libraries(
   rg_grpc_proto
   ${_REFLECTION}
   ${_GRPC_GRPCPP}
-  ${_PROTOBUF_LIBPROTOBUF})
+  ${_PROTOBUF_LIBPROTOBUF}
+  -Wl,--whole-archive          # Ensure all static symbols are included
+        -static                      # Force static linking
+        -pthread                     # Include pthread for thread safety
+        -Wl,--no-whole-archive)
 
 
-add_library(my_grpc_lib
+add_library(my_grpc_lib STATIC
   ${rg_grpc_srcs}
   ${rg_grpc_hdrs}
   ${rg_proto_srcs}
   ${rg_proto_hdrs}
   grpc_functions.cc)
 
-target_link_libraries(my_grpc_lib
-  absl::absl_log
-  ${_REFLECTION}
-  ${_GRPC_GRPCPP}
-  ${_PROTOBUF_LIBPROTOBUF})
-
 target_link_libraries(
   my_grpc_lib
   ${_REFLECTION}
   ${_GRPC_GRPCPP}
-  ${_PROTOBUF_LIBPROTOBUF})
+  ${_PROTOBUF_LIBPROTOBUF}
+  -Wl,--whole-archive          # Ensure all static symbols are included
+        -static                      # Force static linking
+        -pthread                     # Include pthread for thread safety
+        -Wl,--no-whole-archive)
 
 add_executable(image_client "image_client.cc")
 target_link_libraries(image_client rg_grpc_proto my_grpc_lib absl::flags_parse absl::absl_log absl::log_initialize absl::log_globals ${_REFLECTION} ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF})

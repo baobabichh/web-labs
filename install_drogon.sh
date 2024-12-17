@@ -11,6 +11,14 @@ sudo apt-get install -y libmariadb-dev-compat libmariadb-dev
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
+sudo apt-get install -y drogon
+sudo apt-get update -y
+sudo apt-get upgrade -y
+
+sudo apt-get install -y libc-ares-dev
+sudo apt-get update -y
+sudo apt-get upgrade -y
+
 sudo apt-get install -y libsqlite3-dev
 sudo apt-get update -y
 sudo apt-get upgrade -y

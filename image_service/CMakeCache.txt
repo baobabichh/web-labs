@@ -234,7 +234,7 @@ absl_DIR:PATH=/usr/local/lib/cmake/absl
 gRPC_DIR:PATH=/usr/local/lib/cmake/grpc
 
 //Dependencies for the target
-my_grpc_lib_LIB_DEPENDS:STATIC=general;gRPC::grpc++_reflection;general;gRPC::grpc++;general;protobuf::libprotobuf;general;gRPC::grpc++_reflection;general;gRPC::grpc++;general;protobuf::libprotobuf;
+my_grpc_lib_LIB_DEPENDS:STATIC=general;gRPC::grpc++_reflection;general;gRPC::grpc++;general;protobuf::libprotobuf;general;-Wl,--whole-archive;general;-static;general;-pthread;general;-Wl,--no-whole-archive;
 
 //CMake built-in FindProtobuf.cmake module compatible
 protobuf_MODULE_COMPATIBLE:BOOL=OFF
@@ -243,7 +243,7 @@ protobuf_MODULE_COMPATIBLE:BOOL=OFF
 protobuf_VERBOSE:BOOL=OFF
 
 //Dependencies for the target
-rg_grpc_proto_LIB_DEPENDS:STATIC=general;gRPC::grpc++_reflection;general;gRPC::grpc++;general;protobuf::libprotobuf;general;gRPC::grpc++_reflection;general;gRPC::grpc++;general;protobuf::libprotobuf;
+rg_grpc_proto_LIB_DEPENDS:STATIC=general;gRPC::grpc++_reflection;general;gRPC::grpc++;general;protobuf::libprotobuf;general;-Wl,--whole-archive;general;-static;general;-pthread;general;-Wl,--no-whole-archive;
 
 //The directory containing a CMake configuration file for utf8_range.
 utf8_range_DIR:PATH=/usr/local/lib/cmake/utf8_range
