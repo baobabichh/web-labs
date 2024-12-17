@@ -15,15 +15,8 @@ git clone --recurse-submodules -b v1.66.0 --depth 1 --shallow-submodules https:/
 cd grpc
 mkdir -p cmake/build
 cd cmake/build
-cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. \
-      -DgRPC_INSTALL=ON                \
-      -DCMAKE_BUILD_TYPE=Release       \
-      -DgRPC_ABSL_PROVIDER=package     \
-      -DgRPC_CARES_PROVIDER=package    \
-      -DgRPC_PROTOBUF_PROVIDER=package \
-      -DgRPC_RE2_PROVIDER=package      \
-      -DgRPC_SSL_PROVIDER=package      \
-      -DgRPC_ZLIB_PROVIDER=package     \
+cmake -DgRPC_INSTALL=ON \
+      -DgRPC_BUILD_TESTS=OFF \
       ../..
 make -j 4
 make install
