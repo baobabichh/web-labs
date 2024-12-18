@@ -32,6 +32,9 @@ public:
                 std::cout << "1not ok\n";
                 return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to open file for writing.");
             }
+
+            std::cout << "request->image_data().size(): " << request->image_data().size() << "\n";
+
             file.write(request->image_data().data(), request->image_data().size());
             file.close();
 

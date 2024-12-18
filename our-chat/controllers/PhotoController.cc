@@ -4,6 +4,36 @@
 
 // Add definition of your processing function here
 
+#include <iostream>
+#include <string>
+#include <vector>
+#include <sstream>
+
+std::vector<char> convertStringToCharVector(const std::string& input) {
+    std::vector<char> charVector;
+    std::stringstream ss(input);
+    std::string number;
+
+    // Use ',' as the delimiter to split the string into numbers
+    while (std::getline(ss, number, ',')) {
+        try {
+            // Convert the number string to an integer
+            int num = std::stoi(number);
+
+            // Convert the integer to a char and add it to the vector
+            // Make sure the number is within the valid range for a char
+            if (num < 0 || num > 255) {
+                throw std::out_of_range("Number out of char range");
+            }
+            charVector.push_back(static_cast<char>(num));
+        } catch (const std::exception& e) {
+            std::cerr << "Error converting '" << number << "': " << e.what() << std::endl;
+        }
+    }
+
+    return charVector;
+}
+
 void PhotoController::updateUserPhoto(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback)
 {
     auto session = req->getSession();
@@ -12,10 +42,16 @@ void PhotoController::updateUserPhoto(const HttpRequestPtr& req, std::function<v
     const size_t user_id = session->get<size_t>("user_id");
 
     std::string img_data = req->getParameter("ImageData");
-    std::vector<char> img_data_vec{std::begin(img_data), std::end(img_data)};
+
+    std::cout << "img_data.size(): " << img_data.size() << "\n";
 
 
-    if(img_data_vec.size() > 1000000)
+    std::vector<char> img_data_vec{convertStringToCharVector(img_data)};
+
+    std::cout << "send data: " << img_data_vec.size() << "\n";
+
+
+    if(img_data_vec.size() > 20000000)
     {
         Json::Value jsonResponse;
         jsonResponse["Message"] = "Image is too big";
