@@ -1,5 +1,6 @@
 .vscode/
 our-chat/build/
+our-chat/files/uploads/
 image_service/build/
 images/
 drogon/
