@@ -137,9 +137,125 @@
         <button onclick="updateUserInfo()">Save Changes</button>
         <button class="delete" onclick="deleteUser()">Delete Account</button>
         <div id="updateMessage" class="info"></div>
+
+        <h3>Profile Photo</h3>
+        <img id="profilePhoto" src="" alt="Profile Photo" style="width: 100%; max-width: 150px; margin-bottom: 10px;">
+        <input type="file" id="photoInput" accept="image/*">
+        <button onclick="updateUserPhoto()">Upload Photo</button>
+        <div id="updateMessage" class="info"></div>
     </div>
 
     <script>
+        
+        async function fetchUserPhoto() {
+            try {
+                const response = await fetch('/get_user_photo?user_id=1');
+                if (response.ok) {
+                    const blob = await response.blob();
+                    document.getElementById('profilePhoto').src = URL.createObjectURL(blob);
+                } else {
+                    console.error('Failed to load photo');
+                }
+            } catch (error) {
+                console.error('Error fetching photo:', error);
+            }
+        }
+
+        function getBase64StringFromImageInput(inputId) {
+            return new Promise((resolve, reject) => {
+                const inputElement = document.getElementById(inputId);
+
+                if (!inputElement) {
+                    reject(`Element with id "${inputId}" not found.`);
+                    return;
+                }
+
+                inputElement.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+
+                    if (!file) {
+                        reject('No file selected.');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const dataUrl = e.target.result; // Base64 string representation of the image
+                        resolve(dataUrl); // Resolve the promise with the data URL
+                    };
+
+                    reader.onerror = function(error) {
+                        reject(`Error reading file: ${error}`);
+                    };
+
+                    reader.readAsDataURL(file); // Read the file as a data URL
+                }, { once: true });  // Use { once: true } to ensure the event listener is only run once
+            });
+        }
+
+        async function getImageAsByteArray(inputElementId) {
+            return new Promise((resolve, reject) => {
+                // Get the file input element
+                const fileInput = document.getElementById(inputElementId);
+                if (!fileInput || fileInput.type !== "file") {
+                    reject("File input not found or incorrect type.");
+                    return;
+                }
+
+                // Ensure a file is selected
+                const file = fileInput.files[0];
+                if (!file) {
+                    reject("No file is selected.");
+                    return;
+                }
+
+                // Use FileReader to read the file as an ArrayBuffer
+                const reader = new FileReader();
+
+                // Define the onload callback
+                reader.onload = function(event) {
+                    // Convert the ArrayBuffer to a Uint8Array (byte array)
+                    const arrayBuffer = event.target.result;
+                    const byteArray = new Uint8Array(arrayBuffer);
+                    resolve(byteArray);
+                };
+
+                // Define the onerror callback
+                reader.onerror = function() {
+                    reject("Error reading file.");
+                };
+
+                // Read the file as an ArrayBuffer
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        
+
+        async function updateUserPhoto() {
+                try {
+                    const byteArray = await getImageAsByteArray("photoInput");
+                    console.log("Image byte array:", byteArray);
+                    // Do something with the byte array
+
+                    let formData = new URLSearchParams();
+                    formData.append("ImageData", byteArray);
+
+                    await fetch('/update_photo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: formData.toString()
+                    })
+                } catch (error) {
+                    console.error("Error:", error);
+                }
+                fetchUserPhoto();
+        }
+
+
         // Toggle Password Visibility
         function togglePasswordVisibility() {
             const passwordField = document.getElementById('passwordInput');
@@ -219,8 +335,11 @@
             }
         }
 
-        // Fetch user info on page load
-        window.onload = fetchUserInfo;
+        window.onload = () => {
+            fetchUserInfo();
+            fetchUserPhoto();
+        };
+
     </script>
 </body>
 </html>
