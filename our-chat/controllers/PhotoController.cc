@@ -49,6 +49,49 @@ void PhotoController::updateUserPhoto(const HttpRequestPtr& req, std::function<v
 
 void PhotoController::getUserPhoto(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback)
 {
+    auto session = req->getSession();
+    auto dbClient = app().getDbClient("our_chat");
 
+    std::string user_id = req->getParameter("user_id");
+    if(user_id.empty())
+    {
+        Json::Value jsonResponse;
+        jsonResponse["Message"] = "Param user_id is empty";
+        jsonResponse["Status"] = "Error";
+        auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+        response->setStatusCode(k200OK);
+        callback(response);
+        return;
+    }
+
+    std::vector<char> data{};
+
+    if(GetPhotoDataOfUser("0.0.0.0:50051", user_id, data))
+    {
+        std::cout << "data.size(): " << data.size() << "\n";
+
+        auto response = HttpResponse::newHttpResponse();
+        response->setStatusCode(k200OK);
+
+        response->setContentTypeCodeAndCustomString(
+            drogon::CT_APPLICATION_OCTET_STREAM, "image/png"
+        );
+
+        response->setBody(std::string(data.begin(), data.end()));
+        callback(response);
+        return;
+    }
+    else
+    {
+        std::cout << "data.size(): " << data.size() << "\n";
+
+        Json::Value jsonResponse;
+        jsonResponse["Message"] = "Can not get image";
+        jsonResponse["Status"] = "Error";
+        auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+        response->setStatusCode(k200OK);
+        callback(response);
+        return;
+    }
 }
 

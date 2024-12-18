@@ -1,2 +1,0 @@
-/usr/bin/ar qc librg_grpc_proto.a "CMakeFiles/rg_grpc_proto.dir/home/goshan9/web-labs/web-labs/generated_protos/protos/image_service.grpc.pb.cc.o" "CMakeFiles/rg_grpc_proto.dir/home/goshan9/web-labs/web-labs/generated_protos/protos/image_service.pb.cc.o"
-/usr/bin/ranlib librg_grpc_proto.a

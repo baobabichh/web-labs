@@ -1,9 +1,41 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(our-chat CXX)
 
-find_package(Threads REQUIRED)
-find_package(Protobuf REQUIRED)
-find_package(gRPC REQUIRED)
+find_library(CARES_LIB NAMES cares PATHS /lib /usr/lib /usr/local/lib PATH_SUFFIXES x86_64-linux-gnu)
+
+if(NOT CARES_LIB)
+    message(FATAL_ERROR "c-ares library not found")
+endif()
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+set(CMAKE_CXX_STANDARD 17)            # Use C++17 standard
+set(CMAKE_CXX_STANDARD_REQUIRED ON)   # Require the standard to be supported
+set(CMAKE_CXX_EXTENSIONS OFF)         # Disable compiler-specific extensions
+
+# include(../grpc/examples/cpp/cmake/common.cmake)
+
+find_package(Protobuf CONFIG REQUIRED)
+find_package(gRPC CONFIG REQUIRED)
+
+include_directories(generated_protos)
+include_directories(../generated_protos/)
+include_directories(../)
+
+# Find absl package
+find_package(absl CONFIG REQUIRED)
+
+# Proto file
+get_filename_component(rg_proto "protos/image_service.proto" ABSOLUTE)
+get_filename_component(rg_proto_path "${rg_proto}" PATH)
+
+# Generated sources
+set(rg_proto_srcs "../generated_protos/protos/image_service.pb.cc")
+set(rg_proto_hdrs "../generated_protos/protos/image_service.pb.h")
+set(rg_grpc_srcs "../generated_protos/protos/image_service.grpc.pb.cc")
+set(rg_grpc_hdrs "../generated_protos/protos/image_service.grpc.pb.h")
+
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 include(CheckIncludeFileCXX)
 
@@ -25,9 +57,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME} main.cc)
 
-find_package(Protobuf REQUIRED)
-find_package(gRPC REQUIRED)
-
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
 # to add drogon 
@@ -41,9 +70,10 @@ find_package(Drogon CONFIG REQUIRED)
 # target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../image_service)
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/../image_service/librg_grpc_proto.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/../image_service/libmy_grpc_lib.a
+    ${CMAKE_CURRENT_SOURCE_DIR}/../image_service/build/librg_grpc_proto.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/../image_service/build/libmy_grpc_lib.so
     Drogon::Drogon
+    gRPC::grpc++ protobuf::libprotobuf
 )
 
 # ##############################################################################
