@@ -2,3 +2,5 @@
 our-chat/build/
 image_service/build/
 images/
+drogon/
+grpc/
