@@ -1,3 +1,4 @@
 .vscode/
-our-chat/build/our-chat
+our-chat/build/
+image_service/build/
 images/
