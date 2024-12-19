@@ -264,16 +264,28 @@
 
         // Fetch user information
         async function fetchUserInfo() {
-            try {
-                const response = await fetch('/get_user_info');
+
+            const query = `{ getUserInfo { ID Name Password }}`;
+
+            console.log("sending graphql");
+
+            try {   
+                const response = await fetch('/get_user_info_graph', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: query,
+                });
                 const result = await response.json();
 
-                if (result.Status === "Success") {
-                    document.getElementById('userId').textContent = result.ID;
-                    document.getElementById('nameInput').value = result.Name;
-                    document.getElementById('passwordInput').value = result.Password;
+                if (result.data && result.data.getUserInfo) {
+                    const userInfo = result.data.getUserInfo;
+                    document.getElementById('userId').textContent = userInfo.ID;
+                    document.getElementById('nameInput').value = userInfo.Name;
+                    document.getElementById('passwordInput').value = userInfo.Password;
                 } else {
-                    document.getElementById('updateMessage').textContent = result.Message || "Failed to retrieve user information.";
+                    document.getElementById('updateMessage').textContent = result.errors ? result.errors[0].message : 'Failed to retrieve user information.';
                 }
             } catch (error) {
                 console.error('Error fetching user information:', error);

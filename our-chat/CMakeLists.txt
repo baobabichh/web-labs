@@ -3,10 +3,6 @@ project(our-chat CXX)
 
 find_library(CARES_LIB NAMES cares PATHS /lib /usr/lib /usr/local/lib PATH_SUFFIXES x86_64-linux-gnu)
 
-if(NOT CARES_LIB)
-    message(FATAL_ERROR "c-ares library not found")
-endif()
-
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_CXX_STANDARD 17)            # Use C++17 standard
@@ -17,6 +13,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)         # Disable compiler-specific extensions
 
 find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
+
+include_directories(../libgraphqlparser/)
 
 include_directories(generated_protos)
 include_directories(../generated_protos/)
@@ -72,6 +70,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/../image_service/build/librg_grpc_proto.so
     ${CMAKE_CURRENT_SOURCE_DIR}/../image_service/build/libmy_grpc_lib.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/../libgraphqlparser/libgraphqlparser.so
     Drogon::Drogon
     gRPC::grpc++ protobuf::libprotobuf
 )
