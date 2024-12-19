@@ -12,4 +12,6 @@ http://104.248.137.89:50505/index.html
 ./rebuild.sh
 
 # Deploy to prod
-nohup ./rebuild.sh > output.log 2>&1 &
+nohup ./our-chat/rebuild.sh > chat_output.log 2>&1 &
+
+nohup ./image_service/build/image_service > immg_output.log 2>&1 &
