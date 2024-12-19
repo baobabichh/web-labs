@@ -1,0 +1,9 @@
+{
+    query {
+        User(id: 1) {
+            ID
+            Name
+            Photo
+        }
+    }
+}

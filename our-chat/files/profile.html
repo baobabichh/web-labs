@@ -146,10 +146,12 @@
     </div>
 
     <script>
+
+        let my_user_id;
         
         async function fetchUserPhoto() {
             try {
-                const response = await fetch('/get_user_photo?user_id=1');
+                const response = await fetch(`/get_user_photo?user_id=${my_user_id}`);
                 if (response.ok) {
                     const blob = await response.blob();
                     document.getElementById('profilePhoto').src = URL.createObjectURL(blob);
@@ -262,36 +264,65 @@
             passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
         }
 
-        // Fetch user information
         async function fetchUserInfo() {
-
-            const query = `{ getUserInfo { ID Name Password }}`;
-
-            console.log("sending graphql");
-
-            try {   
-                const response = await fetch('/get_user_info_graph', { 
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: query,
-                });
+            try {
+                const response = await fetch('/get_user_info');
                 const result = await response.json();
 
-                if (result.data && result.data.getUserInfo) {
-                    const userInfo = result.data.getUserInfo;
-                    document.getElementById('userId').textContent = userInfo.ID;
-                    document.getElementById('nameInput').value = userInfo.Name;
-                    document.getElementById('passwordInput').value = userInfo.Password;
+                if (result.Status === "Success") {
+                    my_user_id = result.ID;
+                    document.getElementById('userId').textContent = result.ID;
+                    document.getElementById('nameInput').value = result.Name;
+                    document.getElementById('passwordInput').value = result.Password;
                 } else {
-                    document.getElementById('updateMessage').textContent = result.errors ? result.errors[0].message : 'Failed to retrieve user information.';
+                    document.getElementById('updateMessage').textContent = result.Message || "Failed to retrieve user information.";
                 }
             } catch (error) {
                 console.error('Error fetching user information:', error);
                 document.getElementById('updateMessage').textContent = "An error occurred while fetching profile information.";
             }
         }
+
+
+        // Fetch user information
+        // async function fetchUserInfo() {
+
+        //     const query = 
+        //                     `
+        //                         query {
+        //                             User(id: 1) {
+        //                                 ID
+        //                                 Name
+        //                                 Photo
+        //                             }
+        //                         }
+        //                     `;
+
+        //     console.log("sending graphql");
+
+        //     try {   
+        //         const response = await fetch('/get_user_info_graph', { 
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //             },
+        //             body: query,
+        //         });
+        //         const result = await response.json();
+
+        //         if (result.data && result.data.getUserInfo) {
+        //             const userInfo = result.data.getUserInfo;
+        //             document.getElementById('userId').textContent = userInfo.ID;
+        //             document.getElementById('nameInput').value = userInfo.Name;
+        //             document.getElementById('passwordInput').value = userInfo.Password;
+        //         } else {
+        //             document.getElementById('updateMessage').textContent = result.errors ? result.errors[0].message : 'Failed to retrieve user information.';
+        //         }
+        //     } catch (error) {
+        //         console.error('Error fetching user information:', error);
+        //         document.getElementById('updateMessage').textContent = "An error occurred while fetching profile information.";
+        //     }
+        // }
 
         // Update user information
         async function updateUserInfo() {
@@ -347,9 +378,9 @@
             }
         }
 
-        window.onload = () => {
-            fetchUserInfo();
-            fetchUserPhoto();
+         window.onload = async function() {
+            await fetchUserInfo();
+            await fetchUserPhoto();
         };
 
     </script>

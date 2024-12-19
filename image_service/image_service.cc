@@ -59,8 +59,7 @@ public:
 
             if (!fs::exists(file_path))
             {
-                std::cout << "1not ok\n";
-                return grpc::Status(grpc::StatusCode::NOT_FOUND, "Image not found.");
+                file_path = "../../default.png";
             }
 
             std::ifstream file(file_path, std::ios::binary);

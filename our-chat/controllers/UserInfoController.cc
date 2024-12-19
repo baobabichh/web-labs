@@ -1,4 +1,11 @@
 #include "UserInfoController.h"
+#include <c/GraphQLParser.h>
+#include <c/GraphQLAstToJSON.h>
+#include <AstNode.h>
+#include <GraphQLParser.h>
+#include <json/json.h>
+
+#include "grpc_functions.h"
 
 std::string escapeLike(const std::string& str)
 {
@@ -11,11 +18,83 @@ std::string escapeLike(const std::string& str)
     return result;
 }
 
-#include <c/GraphQLParser.h>
-#include <c/GraphQLAstToJSON.h>
-#include <AstNode.h>
-#include <GraphQLParser.h>
-#include <json/json.h>
+
+
+std::string graphql_to_json(const std::string& graphql, std::string& err)
+{
+    const char* error{};
+    auto AST = facebook::graphql::parseString(graphql.c_str(), &error);
+    if (!AST) {
+        std::cerr << "Parser failed with error: " << error << std::endl;
+        err = std::string{err};
+        free((void *)error);
+        return {};
+    }
+
+    const char *json = graphql_ast_to_json(reinterpret_cast<const struct GraphQLAstNode *>(AST.get()));
+    std::string res{json};
+    free((void *)json);
+    return res;
+}
+
+struct UserQuery
+{
+    std::vector<uint32_t> ids{};
+    std::vector<std::string> fields{};
+};
+
+UserQuery parseGraphQLResponse(const std::string &jsonText, std::string& err)
+{
+    Json::Value root;
+    Json::CharReaderBuilder readerBuilder;
+    std::string errs;
+
+    std::istringstream s(jsonText);
+    if (!Json::parseFromStream(readerBuilder, s, &root, &errs))
+    {
+       err ="Failed to parse JSON: " + errs;
+       return {};
+    }
+
+    UserQuery query;
+
+    const auto &definitions = root["definitions"];
+    for (const auto &definition : definitions)
+    {
+        const auto &selections = definition["selectionSet"]["selections"];
+        for (const auto &selection : selections)
+        {
+            const auto &arguments = selection["arguments"];
+            for (const auto &argument : arguments)
+            {
+                if (argument["name"]["value"].asString() == "id")
+                {
+                    query.ids.push_back(std::stoll(argument["value"]["value"].asString()));
+                }
+            }
+
+            const auto &userSelections = selection["selectionSet"]["selections"];
+            for (const auto &userSelection : userSelections)
+            {
+                query.fields.push_back(userSelection["name"]["value"].asString());
+            }
+        }
+    }
+
+    static const std::set<std::string> good_fields{"id", "name", "photo"};
+    for(auto& field : query.fields)
+    {
+        std::transform(field.begin(), field.end(), field.begin(), [](unsigned char c){ return std::tolower(c); });
+        if(!good_fields.count(field))
+        {
+            err = "bad field " + field;
+            return query;
+        }
+    }
+
+
+    return query;
+}
 
 void UserInfoController::getUserInfoGraph(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback)
 {
@@ -24,27 +103,83 @@ void UserInfoController::getUserInfoGraph(const HttpRequestPtr& req, std::functi
 
     std::cout << "query_string: " << query_string << "\n";
 
-    // Retrieve user ID from session
-    auto session = req->getSession();
-    const size_t user_id = session->get<size_t>("user_id");
-
-    // Parse the GraphQL query using libgraphqlparser
-    const char *error = nullptr;
-    auto ast = facebook::graphql::parseString(query_string.c_str(), &error);
-
-    if (!ast) {
-        // Handle parsing error
+    std::string err{};
+    const std::string graph_json = graphql_to_json(query_string, err);
+    if(err.size())
+    {
         Json::Value jsonResponse;
-        jsonResponse["Message"] = std::string("Query parsing failed: ") + error;
+        jsonResponse["Message"] = err;
         jsonResponse["Status"] = "Fail";
         auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
-        response->setStatusCode(k400BadRequest);
+        response->setStatusCode(k200OK);
         callback(response);
         return;
     }
 
+    // Retrieve user ID from session
+    auto session = req->getSession();
+    const size_t user_id = session->get<size_t>("user_id");
+
+    err = {};
+    auto users_query = parseGraphQLResponse(graph_json, err);
+    if(err.size())
+    {
+        Json::Value jsonResponse;
+        jsonResponse["Message"] = err;
+        jsonResponse["Status"] = "Fail";
+        auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+        response->setStatusCode(k200OK);
+        callback(response);
+        return;
+    }
+
+    std::ostringstream ss{};
+
+    ss << "SELECT id, ";
+    {
+        int added{0};
+        for(const auto& field : users_query.fields)
+        {
+            if(field == "photo" || field == "id")
+            {
+                continue;
+            }
+
+            if(added)
+            {
+                ss << ", ";
+            }
+
+            ss << field << " ";
+            added++;
+        }
+    }
+    ss << " from Users ";
+    {
+        int added{0};
+        if(users_query.ids.size())
+        {
+            ss << " where id in (";
+            for(const auto& id : users_query.ids)
+            {
+                if(added)
+                {
+                    ss << ", ";
+                }
+                ss << id;
+                added++;
+            }
+            ss << ")";
+        }
+    }
+
+    std::string sql_query{ss.str()};
+
+    std::cout << "sql_query: " << sql_query << "\n";
+
+
     // Convert AST to JSON for easier handling
-    std::string astJson = query_string;
+    std::string astJson = graph_json;
     Json::Value jsonRoot;
     Json::CharReaderBuilder readerBuilder;
     std::string errs;
@@ -55,49 +190,64 @@ void UserInfoController::getUserInfoGraph(const HttpRequestPtr& req, std::functi
         jsonResponse["Message"] = std::string("Failed to parse AST JSON: ") + errs;
         jsonResponse["Status"] = "Fail";
         auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
-        response->setStatusCode(k400BadRequest);
+        response->setStatusCode(k200OK);
         callback(response);
         return;
     }
 
-    auto dbClient = app().getDbClient("our_chat");
-
-    // Process the parsed query. This example assumes a basic query.
-    for (const auto& selection : jsonRoot["definitions"][0]["selectionSet"]["selections"]) {
-        std::string operation = selection["name"]["value"].asString();
-        if (operation == "getUserInfo") {
-            try {
-                // Execute query
-                orm::Result result = dbClient->execSqlSync("SELECT ID, Name, Password FROM Users WHERE ID = ?", std::to_string(user_id), 1);
-                
-                for (auto row : result) {
-                    Json::Value jsonResponse;
-                    jsonResponse["ID"] = row["ID"].as<size_t>();
-                    jsonResponse["Name"] = row["Name"].as<std::string>();
-                    jsonResponse["Password"] = row["Password"].as<std::string>();
-                    jsonResponse["Status"] = "Success";
-                    auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
-                    callback(response);
-                    return;
+    /*
+        {
+            "data": {
+                "User": {
+                    "ID": 1,
+                    "Name": "John Doe",
+                    "Photo": "https://example.com/photos/johndoe.jpg"
                 }
             }
-            catch (const orm::DrogonDbException &e) {
-                Json::Value jsonResponse;
-                jsonResponse["Message"] = e.base().what();
-                jsonResponse["Status"] = "Fail";
-                auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
-                callback(response);
-                return;
-            }
-
-            // No user found
-            Json::Value jsonResponse;
-            jsonResponse["Message"] = "No such user";
-            jsonResponse["Status"] = "Fail";
-            auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
-            callback(response);
-            return;
         }
+    */
+
+    auto dbClient = app().getDbClient("our_chat");
+
+    try 
+    {
+        orm::Result result = dbClient->execSqlSync(sql_query, 1);
+
+        Json::Value jsonResponse;
+        Json::Value usersJson(Json::arrayValue);
+
+        for (const auto &row : result)
+        {
+            Json::Value userJson;
+
+            for(const auto& field : users_query.fields)
+            {
+                if(field == "photo")
+                {
+                    userJson["photo"] = "/get_user_photo?user_id=" + row["id"].as<std::string>();
+                    continue;
+                }
+
+                userJson[field] = row[field].as<std::string>();
+            }
+            
+            usersJson.append(userJson);
+        }
+        jsonResponse["data"]["Users"] = usersJson;
+        jsonResponse["Status"] = "Success";
+        auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+        response->setStatusCode(k200OK);
+        callback(response);
+    }
+    catch (const orm::DrogonDbException &e)
+    {
+        Json::Value jsonResponse;
+        jsonResponse["Message"] = e.base().what();
+        jsonResponse["Status"] = "Fail";
+        auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+        response->setStatusCode(k200OK);
+        callback(response);
+        return;
     }
 }
 

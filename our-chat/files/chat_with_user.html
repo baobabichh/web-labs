@@ -113,6 +113,11 @@
         <a href="profile.html">Profile</a> |
         <a href="index.html">Login</a>
     </div>
+
+    <div id="user-photo-container">
+        <img id="user-photo" src="" alt="User Photo" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px;"/>
+    </div>
+
     <div id="messages"></div>
 
     <div class="message-input-container">
@@ -152,24 +157,41 @@
         }
         const userIdTo = getQueryParam("user_id");
         let userToName;
+        let userToPhoto;
+        
 
         async function fetchOtherUserInfo() {
-            try {
-                const response = await fetch(`/get_other_user_info?user_id=${encodeURIComponent(userIdTo)}`); // Encode userIdTo for safety
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
+            const query =  `query { User(id: ${userIdTo}) { ID Name Photo } }`;
 
-                const jsonResponse = await response.json();
+            console.log("sending graphql");
 
-                if (jsonResponse.Status === "Success") {
-                    userToName = jsonResponse.Name;
-                    console.log("User Name retrieved:", userToName);
+            try {   
+                const response = await fetch('/get_user_info_graph', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: query,
+                });
+                const result = await response.json();
+
+                if (result.data && result.data.Users) {
+                    const userInfo = result.data.Users[0];
+                    userToName = userInfo.name;
+                    userToPhoto = userInfo.photo;
+                    console.log("userInfo.Name" + userInfo.name);
+                    console.log("userInfo.Photo" + userInfo.photo);
+
+                    document.getElementById('user-photo').src = userToPhoto;
+                    
                 } else {
-                    console.error("Error fetching other user info:", jsonResponse.Message);
+                    console.error('Error fetching user information:');
                 }
+
+                console.log("userToName" + userToName);
+                console.log("userToPhoto" + userToPhoto);
             } catch (error) {
-                console.error("Error fetching other user info:", error.message);
+                console.error('Error fetching user information:', error);
             }
         }
 
