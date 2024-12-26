@@ -180,6 +180,11 @@
                         return;
                     }
 
+                    if (file.size > 20000000) {
+                        reject("File exceeds the maximum allowed size of 10 MB.");
+                        return;
+                    }
+
                     const reader = new FileReader();
 
                     reader.onload = function(e) {
