@@ -57,6 +57,13 @@
             font-weight: 600;
             margin-bottom: 20px;
         }
+
+        h3 {
+            color: #ecf0f1;
+            font-weight: 600;
+            margin-bottom: 10px;
+            margin-top: 30px;
+        }
     
         /* Input Fields */
         input[type="text"],
@@ -86,7 +93,6 @@
             color: #7f8c8d;
         }
     
-        /* Buttons */
         button {
             width: 100%; 
             padding: 12px;
@@ -98,17 +104,28 @@
             font-size: 16px;
             cursor: pointer;
         }
+
         button.delete {
             background-color: #e74c3c;
             margin-bottom: 15px;
         }
+
         button:hover {
             background-color: #2980b9;
         }
+
         button.delete:hover {
             background-color: #c0392b;
         }
-    
+
+        /* Small Button */
+        button.small-button {
+            padding: 8px; /* Smaller padding */
+            font-size: 14px; /* A smaller font size */
+            width: auto; /* Auto width to make it smaller */
+            margin-top: 10px; /* Adjust margin if needed */
+        }
+        
         /* Messages */
         .message {
             margin-top: 15px;
@@ -140,9 +157,23 @@
 
         <h3>Profile Photo</h3>
         <img id="profilePhoto" src="" alt="Profile Photo" style="width: 100%; max-width: 150px; margin-bottom: 10px;">
-        <input type="file" id="photoInput" accept="image/*">
+        <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="displayFileName()">
+        <button onclick="triggerFileInput()" class="small-button">Choose Photo</button>
+        <div id="fileName" style="margin-top: 10px;"></div>
         <button onclick="updateUserPhoto()">Upload Photo</button>
         <div id="updateMessage" class="info"></div>
+
+        <script>
+        function triggerFileInput() {
+            document.getElementById('photoInput').click();
+        }
+
+        function displayFileName() {
+            const fileInput = document.getElementById('photoInput');
+            const fileNameDisplay = document.getElementById('fileName');
+            fileNameDisplay.textContent = fileInput.files[0] ? fileInput.files[0].name : '';
+        }
+        </script>
     </div>
 
     <script>
@@ -169,7 +200,7 @@
                 const fileInput = document.getElementById(inputElementId);
                 if (!fileInput || fileInput.type !== "file") {
                     resolve({
-                        msg: "File input not found or incorrect type"
+                        msg: "File input not found or incorrect type."
                     });
                     return;
                 }
@@ -178,14 +209,15 @@
                 const file = fileInput.files[0];
                 if (!file) {
                     resolve({
-                        msg: "No file is selected"
+                        msg: "No file is selected."
                     });
                     return;
                 }
 
+                // Check file size
                 if (file.size > 5000000) {
                     resolve({
-                        msg: "Max file size is 5mb"
+                        msg: "Max file size is 5MB."
                     });
                     return;
                 }
@@ -214,7 +246,7 @@
                 // Define the onerror callback
                 reader.onerror = function() {
                     resolve({
-                        msg: "Error while file load"
+                        msg: "Error while loading file."
                     });
                 };
 
@@ -223,31 +255,20 @@
             });
         }
 
-        
-
         async function updateUserPhoto() {
             try {
-                // Get the file input element and ensure a file is selected
-                const fileInput = document.getElementById("photoInput");
-                const file = fileInput?.files[0];
-                if (!file) {
-                    throw new Error("No file is selected.");
-                }
-
-                // Extract the file extension
-                const fileName = file.name;
-                const extension = fileName.substring(fileName.lastIndexOf('.') + 1);
-                
-                const file_data = await getImageAsByteArrayAndExtension("photoInput");
-                if(file_data.msg != "Success")
-                {
-                    alert(file_data.msg);
+                // Get image data
+                const fileData = await getImageAsByteArrayAndExtension("photoInput");
+                if (fileData.msg !== "Success") {
+                    alert(fileData.msg);
                     return;
                 }
-                const byteArray = file_data.byteArray;
-                const fileExt = file_data.extension;
+
+                const byteArray = fileData.byteArray;
+                const fileExt = fileData.extension;
                 console.log("Image byte array:", byteArray);
 
+                // Prepare and send data
                 let formData = new URLSearchParams();
                 formData.append("ImageData", JSON.stringify(Array.from(byteArray)));
                 formData.append("ImageExt", fileExt);
