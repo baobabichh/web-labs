@@ -180,6 +180,8 @@
                         return;
                     }
 
+                    console.log("file.size" + file.size);
+
                     if (file.size > 5000000) {
                         reject("File exceeds the maximum allowed size of 10 MB.");
                         return;
