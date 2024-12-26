@@ -122,8 +122,9 @@
         button.small-button {
             padding: 8px; /* Smaller padding */
             font-size: 14px; /* A smaller font size */
-            width: auto; /* Auto width to make it smaller */
-            margin-top: 10px; /* Adjust margin if needed */
+            width: auto; /* Auto width to fit content */
+            margin: 10px auto; /* Center horizontally within the div */
+            display: block; /* Ensures block-level for proper stacking */
         }
         
         /* Messages */
@@ -156,12 +157,14 @@
         <div id="updateMessage" class="info"></div>
 
         <h3>Profile Photo</h3>
-        <img id="profilePhoto" src="" alt="Profile Photo" style="width: 100%; max-width: 150px; margin-bottom: 10px;">
-        <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="displayFileName()">
-        <button onclick="triggerFileInput()" class="small-button">Choose Photo</button>
-        <div id="fileName" style="margin-top: 10px;"></div>
-        <button onclick="updateUserPhoto()">Upload Photo</button>
-        <div id="updateMessage" class="info"></div>
+        <div id="photoContainer" style="text-align: center;"> <!-- Centering wrapper -->
+            <img id="profilePhoto" src="" alt="Profile Photo" style="width: 100%; max-width: 150px; margin-bottom: 10px;">
+            <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="displayFileName()">
+            <button onclick="triggerFileInput()" class="small-button" style="margin-top: 10px;">Choose Photo</button>
+            <div id="fileName" style="margin-top: 10px;"></div>
+            <button onclick="updateUserPhoto()">Upload Photo</button>
+            <div id="updateMessage" class="info"></div>
+        </div>
 
         <script>
         function triggerFileInput() {
