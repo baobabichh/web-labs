@@ -239,9 +239,9 @@
                 const extension = fileName.substring(fileName.lastIndexOf('.') + 1);
                 
                 const file_data = await getImageAsByteArrayAndExtension("photoInput");
-                if(!file_data)
+                if(file_data.msg != "Success")
                 {
-                    alert("Error while file load");
+                    alert(msg);
                     return;
                 }
                 const byteArray = file_data.byteArray;
