@@ -241,7 +241,7 @@
                 const file_data = await getImageAsByteArrayAndExtension("photoInput");
                 if(file_data.msg != "Success")
                 {
-                    alert(msg);
+                    alert(file_data.msg);
                     return;
                 }
                 const byteArray = file_data.byteArray;
