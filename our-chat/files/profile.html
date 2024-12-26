@@ -163,45 +163,6 @@
             }
         }
 
-        function getBase64StringFromImageInput(inputId) {
-            return new Promise((resolve, reject) => {
-                const inputElement = document.getElementById(inputId);
-
-                if (!inputElement) {
-                    reject(`Element with id "${inputId}" not found.`);
-                    return;
-                }
-
-                inputElement.addEventListener('change', function(event) {
-                    const file = event.target.files[0];
-                    console.log("file.size" + file.size);
-
-                    if (!file) {
-                        reject('No file selected.');
-                        return;
-                    }
-
-                    if (file.size > 5000000) {
-                        reject("File exceeds the maximum allowed size of 10 MB.");
-                        return;
-                    }
-
-                    const reader = new FileReader();
-
-                    reader.onload = function(e) {
-                        const dataUrl = e.target.result; // Base64 string representation of the image
-                        resolve(dataUrl); // Resolve the promise with the data URL
-                    };
-
-                    reader.onerror = function(error) {
-                        reject(`Error reading file: ${error}`);
-                    };
-
-                    reader.readAsDataURL(file); // Read the file as a data URL
-                }, { once: true });  // Use { once: true } to ensure the event listener is only run once
-            });
-        }
-
         async function getImageAsByteArrayAndExtension(inputElementId) {
             return new Promise((resolve, reject) => {
                 // Get the file input element
@@ -215,6 +176,11 @@
                 const file = fileInput.files[0];
                 if (!file) {
                     reject("No file is selected.");
+                    return;
+                }
+
+                if (file.size > 5000000) {
+                    reject("File exceeds the maximum allowed size of 10 MB.");
                     return;
                 }
 
