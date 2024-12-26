@@ -42,9 +42,29 @@ void PhotoController::updateUserPhoto(const HttpRequestPtr& req, std::function<v
     const size_t user_id = session->get<size_t>("user_id");
 
     std::string img_data = req->getParameter("ImageData");
+    std::string img_ext = req->getParameter("ImageExt");
+
+    if(img_ext.empty())
+    {
+        Json::Value jsonResponse;
+        jsonResponse["Message"] = "No param ImageExt";
+        jsonResponse["Status"] = "Error";
+        auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+        response->setStatusCode(k200OK);
+        callback(response);
+        return;
+    }
 
     std::cout << "img_data.size(): " << img_data.size() << "\n";
 
+
+    for(size_t i = 0; i < img_data.size(); i++)
+    {
+        if(img_data[i] == '[' || img_data[i] == ']')
+        {
+            img_data.erase(std::begin(img_data) + i);
+        }
+    }
 
     std::vector<char> img_data_vec{convertStringToCharVector(img_data)};
 
@@ -56,6 +76,21 @@ void PhotoController::updateUserPhoto(const HttpRequestPtr& req, std::function<v
         Json::Value jsonResponse;
         jsonResponse["Message"] = "Image is too big";
         jsonResponse["Status"] = "Error";
+        auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+        response->setStatusCode(k200OK);
+        callback(response);
+        return;
+    }
+
+    try 
+    {
+        orm::Result result = dbClient->execSqlSync("UPDATE Users set PhotoExt = ? where ID = ?", img_ext, std::to_string(user_id), 1);
+    }
+    catch (const orm::DrogonDbException &e)
+    {
+        Json::Value jsonResponse;
+        jsonResponse["Message"] = e.base().what();
+        jsonResponse["Status"] = "Fail";
         auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
         response->setStatusCode(k200OK);
         callback(response);
@@ -100,6 +135,42 @@ void PhotoController::getUserPhoto(const HttpRequestPtr& req, std::function<void
         return;
     }
 
+    std::string img_ext{};
+    try 
+    {
+        orm::Result result = dbClient->execSqlSync("SELECT PhotoExt FROM Users WHERE id = ?", user_id, 1);
+
+        int add_count{0};
+        for (auto row : result)
+        {
+            img_ext = row["PhotoExt"].as<std::string>();
+            ++add_count;
+            break;
+        }
+
+        if(!add_count)
+        {
+            Json::Value jsonResponse;
+            jsonResponse["Message"] = "There is no user with such id";
+            jsonResponse["Status"] = "Fail";
+            auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+            response->setStatusCode(k200OK);
+            callback(response);
+            return;
+        }
+
+    }
+    catch (const orm::DrogonDbException &e)
+    {
+        Json::Value jsonResponse;
+        jsonResponse["Message"] = e.base().what();
+        jsonResponse["Status"] = "Fail";
+        auto response = HttpResponse::newHttpJsonResponse(jsonResponse);
+        response->setStatusCode(k200OK);
+        callback(response);
+        return;
+    }
+
     std::vector<char> data{};
 
     if(GetPhotoDataOfUser("0.0.0.0:50051", user_id, data))
@@ -110,7 +181,7 @@ void PhotoController::getUserPhoto(const HttpRequestPtr& req, std::function<void
         response->setStatusCode(k200OK);
 
         response->setContentTypeCodeAndCustomString(
-            drogon::CT_APPLICATION_OCTET_STREAM, "image/png"
+            drogon::CT_APPLICATION_OCTET_STREAM, "image/" + img_ext
         );
 
         response->setBody(std::string(data.begin(), data.end()));

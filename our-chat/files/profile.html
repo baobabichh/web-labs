@@ -196,7 +196,7 @@
             });
         }
 
-        async function getImageAsByteArray(inputElementId) {
+        async function getImageAsByteArrayAndExtension(inputElementId) {
             return new Promise((resolve, reject) => {
                 // Get the file input element
                 const fileInput = document.getElementById(inputElementId);
@@ -212,6 +212,10 @@
                     return;
                 }
 
+                // Get the file extension
+                const fileName = file.name;
+                const extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+
                 // Use FileReader to read the file as an ArrayBuffer
                 const reader = new FileReader();
 
@@ -220,7 +224,12 @@
                     // Convert the ArrayBuffer to a Uint8Array (byte array)
                     const arrayBuffer = event.target.result;
                     const byteArray = new Uint8Array(arrayBuffer);
-                    resolve(byteArray);
+
+                    // Resolve with both the byteArray and extension
+                    resolve({
+                        byteArray: byteArray,
+                        extension: extension
+                    });
                 };
 
                 // Define the onerror callback
@@ -236,25 +245,39 @@
         
 
         async function updateUserPhoto() {
-                try {
-                    const byteArray = await getImageAsByteArray("photoInput");
-                    console.log("Image byte array:", byteArray);
-                    // Do something with the byte array
-
-                    let formData = new URLSearchParams();
-                    formData.append("ImageData", byteArray);
-
-                    await fetch('/update_photo', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: formData.toString()
-                    })
-                } catch (error) {
-                    console.error("Error:", error);
+            try {
+                // Get the file input element and ensure a file is selected
+                const fileInput = document.getElementById("photoInput");
+                const file = fileInput?.files[0];
+                if (!file) {
+                    throw new Error("No file is selected.");
                 }
-                fetchUserPhoto();
+
+                // Extract the file extension
+                const fileName = file.name;
+                const extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+                
+                const file_data = await getImageAsByteArrayAndExtension("photoInput");
+                const byteArray = file_data.byteArray;
+                const fileExt = file_data.extension;
+                console.log("Image byte array:", byteArray);
+
+                let formData = new URLSearchParams();
+                formData.append("ImageData", JSON.stringify(Array.from(byteArray)));
+                formData.append("ImageExt", fileExt);
+
+                await fetch('/update_photo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData.toString(),
+                });
+
+            } catch (error) {
+                console.error("Error:", error);
+            }
+            fetchUserPhoto();
         }
 
 
