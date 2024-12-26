@@ -168,19 +168,25 @@
                 // Get the file input element
                 const fileInput = document.getElementById(inputElementId);
                 if (!fileInput || fileInput.type !== "file") {
-                    reject("File input not found or incorrect type.");
+                    resolve({
+                        msg: "File input not found or incorrect type"
+                    });
                     return;
                 }
 
                 // Ensure a file is selected
                 const file = fileInput.files[0];
                 if (!file) {
-                    reject("No file is selected.");
+                    resolve({
+                        msg: "No file is selected"
+                    });
                     return;
                 }
 
                 if (file.size > 5000000) {
-                    reject("File exceeds the maximum allowed size of 5 MB.");
+                    resolve({
+                        msg: "Max file size is 5mb"
+                    });
                     return;
                 }
 
@@ -200,13 +206,16 @@
                     // Resolve with both the byteArray and extension
                     resolve({
                         byteArray: byteArray,
-                        extension: extension
+                        extension: extension,
+                        msg: "Success"
                     });
                 };
 
                 // Define the onerror callback
                 reader.onerror = function() {
-                    reject("Error reading file.");
+                    resolve({
+                        msg: "Error while file load"
+                    });
                 };
 
                 // Read the file as an ArrayBuffer
